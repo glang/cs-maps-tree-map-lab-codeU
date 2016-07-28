@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.Queue;
 
 /**
  * Implementation of a Map using a binary search tree.
@@ -70,9 +71,19 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		// something to make the compiler happy
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
-		
-		// the actual search
-        // TODO: Fill this in.
+		Node iter = root;
+
+		while (iter != null) {
+			int cmp = k.compareTo(iter.key);
+			if (cmp == 0) {
+				return iter;
+			} else if (cmp > 0) {
+				iter = iter.right;
+			} else {
+				iter = iter.left;
+			}
+		}
+
         return null;
 	}
 
@@ -92,6 +103,25 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
+		Queue<Node> nodes =  new LinkedList<Node>();
+		nodes.add(root);
+
+		while (!nodes.isEmpty()) {
+			Node cur = nodes.remove();
+
+			if (cur.value.equals(target)) {
+				return true;
+			}
+
+			if (cur.left != null) {
+				nodes.add(cur.left);
+			}
+
+			if (cur.right != null) {
+				nodes.add(cur.right);
+			}
+		}
+
 		return false;
 	}
 
@@ -118,7 +148,16 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
         // TODO: Fill this in.
+		keySetHelper(root, set);
 		return set;
+	}
+
+	public void keySetHelper(Node n, Set<K> set) {
+		if (n != null) {
+			keySetHelper(n.left, set);
+			set.add(n.key);
+			keySetHelper(n.right, set);
+		}
 	}
 
 	@Override
@@ -136,6 +175,27 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	private V putHelper(Node node, K key, V value) {
         // TODO: Fill this in.
+		Comparable<? super K> k = (Comparable<? super K>) key;
+		int cmp = k.compareTo(node.key);
+		if (cmp == 0) {
+			V oldValue = node.value;
+			node.value = value;
+			return oldValue;
+		} else if (cmp > 0) {
+			if (node.right != null) {
+				return putHelper(node.right, key, value);
+			} else {
+				node.right = new Node(key, value);
+				++size;
+			}
+		} else {
+			if (node.left != null) {
+				return putHelper(node.left, key, value);
+			} else {
+				node.left = new Node(key, value);
+				++size;
+			}
+		}
         return null;
 	}
 
